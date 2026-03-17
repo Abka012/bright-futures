@@ -1,13 +1,15 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
-import { supabase } from "../lib/supabase";
+import { supabase } from "@/lib/supabase";
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  isDemoMode: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
+  signInDemo: () => void;
   signOut: () => Promise<void>;
 }
 
@@ -17,6 +19,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isDemoMode, setIsDemoMode] = useState(true);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -28,7 +31,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
-      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -36,24 +38,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (!error) {
+      setIsDemoMode(false);
+    }
     return { error };
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
+    const { error } = await supabase.auth.signUp({ 
+      email, 
       password,
-      options: { data: { full_name: fullName } },
+      options: { data: { full_name: fullName } }
     });
+    if (!error) {
+      setIsDemoMode(false);
+    }
     return { error };
   };
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    setIsDemoMode(true);
+  };
+
+  const signInDemo = () => {
+    setIsDemoMode(true);
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, isDemoMode, signIn, signUp, signInDemo, signOut }}>
       {children}
     </AuthContext.Provider>
   );

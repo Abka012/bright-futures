@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   LayoutDashboard,
   School,
@@ -21,25 +22,32 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 const items = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Schools", url: "/schools", icon: School },
-  { title: "Volunteers", url: "/volunteers", icon: Users },
-  { title: "Schedules", url: "/schedules", icon: Calendar },
-  { title: "Partners", url: "/partners", icon: Handshake },
-  { title: "Reports", url: "/reports", icon: BarChart3 },
+  { title: "Dashboard", url: "/app", icon: LayoutDashboard },
+  { title: "Schools", url: "/app/schools", icon: School },
+  { title: "Volunteers", url: "/app/volunteers", icon: Users },
+  { title: "Schedules", url: "/app/schedules", icon: Calendar },
+  { title: "Partners", url: "/app/partners", icon: Handshake },
+  { title: "Reports", url: "/app/reports", icon: BarChart3 },
 ];
 
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
-  const { signOut } = useAuth();
+  const { signOut, isDemoMode } = useAuth();
   const navigate = useNavigate();
+  const [signOutDialogOpen, setSignOutDialogOpen] = useState(false);
 
-  const handleSignOut = async () => {
+  const handleSignOutClick = () => {
+    setSignOutDialogOpen(true);
+  };
+
+  const handleSignOutConfirm = async () => {
     await signOut();
+    setSignOutDialogOpen(false);
     navigate("/login");
   };
 
@@ -65,7 +73,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink
                       to={item.url}
-                      end={item.url === "/"}
+                      end={item.url === "/app"}
                       className="hover:bg-sidebar-accent/50"
                       activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
                     >
@@ -83,7 +91,7 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton onClick={handleSignOut}>
+                <SidebarMenuButton onClick={handleSignOutClick}>
                   <LogOut className="mr-2 h-4 w-4" />
                   {!collapsed && <span>Sign Out</span>}
                 </SidebarMenuButton>
@@ -92,6 +100,25 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <AlertDialog open={signOutDialogOpen} onOpenChange={setSignOutDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Sign Out</AlertDialogTitle>
+          </AlertDialogHeader>
+          <p className="text-sm text-muted-foreground">
+            {isDemoMode 
+              ? "Are you sure you want to exit demo mode?" 
+              : "Are you sure you want to sign out?"}
+          </p>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleSignOutConfirm}>
+              Sign Out
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Sidebar>
   );
 }

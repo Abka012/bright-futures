@@ -1,166 +1,80 @@
--- Create profiles table
-create table public.profiles (
-  id uuid references auth.users on delete cascade not null primary key,
-  email text,
-  full_name text,
-  role text default 'user',
-  created_at timestamptz default now(),
-  updated_at timestamptz default now()
-);
+-- Bright Futures Database Schema
 
--- Enable RLS on profiles
-alter table public.profiles enable row level security;
-
--- Create policies for profiles
-create policy "Users can view own profile" on public.profiles
-  for select using (auth.uid() = id);
-
-create policy "Users can update own profile" on public.profiles
-  for update using (auth.uid() = id);
-
--- Create trigger to automatically create profile on signup
-create or replace function public.handle_new_user()
-returns trigger as $$
-begin
-  insert into public.profiles (id, email, full_name)
-  values (new.id, new.email, new.raw_user_meta_data->>'full_name');
-  return new;
-end;
-$$ language plpgsql security definer;
-
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute procedure public.handle_new_user();
-
--- Schools table
-create table public.schools (
-  id uuid default gen_random_uuid() primary key,
-  name text not null,
+-- Schools
+CREATE TABLE IF NOT EXISTS public.schools (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  name text NOT NULL,
   address text,
   city text,
   state text,
   contact_name text,
   contact_email text,
   contact_phone text,
-  student_count integer default 0,
-  status text default 'pending' check (status in ('active', 'pending', 'inactive')),
-  last_visit date,
+  student_count integer DEFAULT 0,
+  status text DEFAULT 'pending' CHECK (status IN ('active', 'pending', 'inactive')),
   notes text,
-  created_at timestamptz default now(),
-  updated_at timestamptz default now()
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
 );
 
-alter table public.schools enable row level security;
+ALTER TABLE public.schools ENABLE ROW LEVEL SECURITY;
 
-create policy "Authenticated users can view schools" on public.schools
-  for select to authenticated using (true);
+CREATE POLICY "Public access for schools" ON public.schools FOR ALL USING (true);
 
-create policy "Authenticated users can insert schools" on public.schools
-  for insert to authenticated with check (true);
-
-create policy "Authenticated users can update schools" on public.schools
-  for update to authenticated using (true);
-
-create policy "Authenticated users can delete schools" on public.schools
-  for delete to authenticated using (true);
-
--- Volunteers table
-create table public.volunteers (
-  id uuid default gen_random_uuid() primary key,
-  name text not null,
+-- Volunteers
+CREATE TABLE IF NOT EXISTS public.volunteers (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  name text NOT NULL,
   email text,
   phone text,
-  skills text[] default '{}',
+  skills text[] DEFAULT '{}'::text[],
   availability text,
-  hours_logged integer default 0,
-  status text default 'active' check (status in ('active', 'inactive')),
+  hours_logged integer DEFAULT 0,
+  status text DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
   join_date date,
-  created_at timestamptz default now(),
-  updated_at timestamptz default now()
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
 );
 
-alter table public.volunteers enable row level security;
+ALTER TABLE public.volunteers ENABLE ROW LEVEL SECURITY;
 
-create policy "Authenticated users can view volunteers" on public.volunteers
-  for select to authenticated using (true);
+CREATE POLICY "Public access for volunteers" ON public.volunteers FOR ALL USING (true);
 
-create policy "Authenticated users can insert volunteers" on public.volunteers
-  for insert to authenticated with check (true);
-
-create policy "Authenticated users can update volunteers" on public.volunteers
-  for update to authenticated using (true);
-
-create policy "Authenticated users can delete volunteers" on public.volunteers
-  for delete to authenticated using (true);
-
--- Schedules table
-create table public.schedules (
-  id uuid default gen_random_uuid() primary key,
-  school_id uuid references public.schools(id) on delete cascade,
+-- Schedules
+CREATE TABLE IF NOT EXISTS public.schedules (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  school_id uuid REFERENCES public.schools(id) ON DELETE CASCADE,
   school_name text,
-  date date not null,
+  date date NOT NULL,
   time text,
-  volunteer_ids uuid[] default '{}',
-  volunteer_names text[] default '{}',
-  type text default 'workshop' check (type in ('campus-tour', 'workshop', 'mentoring', 'career-day')),
-  status text default 'scheduled' check (status in ('scheduled', 'completed', 'cancelled')),
+  volunteer_ids uuid[] DEFAULT '{}'::uuid[],
+  volunteer_names text[] DEFAULT '{}'::text[],
+  type text DEFAULT 'workshop' CHECK (type IN ('campus-tour', 'workshop', 'mentoring', 'career-day')),
+  status text DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'completed', 'cancelled')),
   notes text,
-  created_at timestamptz default now(),
-  updated_at timestamptz default now()
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
 );
 
-alter table public.schedules enable row level security;
+ALTER TABLE public.schedules ENABLE ROW LEVEL SECURITY;
 
-create policy "Authenticated users can view schedules" on public.schedules
-  for select to authenticated using (true);
+CREATE POLICY "Public access for schedules" ON public.schedules FOR ALL USING (true);
 
-create policy "Authenticated users can insert schedules" on public.schedules
-  for insert to authenticated with check (true);
-
-create policy "Authenticated users can update schedules" on public.schedules
-  for update to authenticated using (true);
-
-create policy "Authenticated users can delete schedules" on public.schedules
-  for delete to authenticated using (true);
-
--- Partners table
-create table public.partners (
-  id uuid default gen_random_uuid() primary key,
-  name text not null,
-  type text default 'corporate' check (type in ('corporate', 'nonprofit', 'government', 'educational')),
+-- Partners
+CREATE TABLE IF NOT EXISTS public.partners (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  name text NOT NULL,
+  type text DEFAULT 'corporate' CHECK (type IN ('corporate', 'nonprofit', 'government', 'educational')),
   contact_name text,
   contact_email text,
   phone text,
   contribution text,
-  status text default 'prospective' check (status in ('active', 'prospective', 'inactive')),
+  status text DEFAULT 'prospective' CHECK (status IN ('active', 'prospective', 'inactive')),
   since date,
-  created_at timestamptz default now(),
-  updated_at timestamptz default now()
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
 );
 
-alter table public.partners enable row level security;
+ALTER TABLE public.partners ENABLE ROW LEVEL SECURITY;
 
-create policy "Authenticated users can view partners" on public.partners
-  for select to authenticated using (true);
-
-create policy "Authenticated users can insert partners" on public.partners
-  for insert to authenticated with check (true);
-
-create policy "Authenticated users can update partners" on public.partners
-  for update to authenticated using (true);
-
-create policy "Authenticated users can delete partners" on public.partners
-  for delete to authenticated using (true);
-
--- Storage bucket for files (if needed)
-insert into storage.buckets (id, name, public) values ('documents', 'documents', true)
-on conflict (id) do nothing;
-
-create policy "Authenticated users can view documents" on storage.objects
-  for select to authenticated using (bucket_id = 'documents');
-
-create policy "Authenticated users can upload documents" on storage.objects
-  for insert to authenticated with check (bucket_id = 'documents');
-
-create policy "Authenticated users can delete documents" on storage.objects
-  for delete to authenticated using (bucket_id = 'documents');
+CREATE POLICY "Public access for partners" ON public.partners FOR ALL USING (true);

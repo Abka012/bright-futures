@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2 } from "lucide-react";
+import { Loader2, User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,7 +30,7 @@ export default function LoginPage() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, signInDemo } = useAuth();
   const navigate = useNavigate();
 
   const signInForm = useForm<SignInFormData>({
@@ -51,7 +51,7 @@ export default function LoginPage() {
       setError(error.message);
       setIsLoading(false);
     } else {
-      navigate("/");
+      navigate("/app");
     }
   };
 
@@ -67,6 +67,11 @@ export default function LoginPage() {
       setIsLoading(false);
       setIsSignUp(false);
     }
+  };
+
+  const onDemoLogin = () => {
+    signInDemo();
+    navigate("/app");
   };
 
   return (
@@ -144,6 +149,18 @@ export default function LoginPage() {
               {isSignUp ? "Sign Up" : "Sign In"}
             </Button>
           </form>
+          {!isSignUp && (
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
+              <div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">Or</span></div>
+            </div>
+          )}
+          {!isSignUp && (
+            <Button type="button" variant="outline" className="w-full" onClick={onDemoLogin} disabled={isLoading}>
+              <User className="mr-2 h-4 w-4" />
+              Try Demo
+            </Button>
+          )}
           <div className="mt-4 text-center text-sm">
             {isSignUp ? (
               <>
