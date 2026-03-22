@@ -99,29 +99,29 @@ Bright Futures streamlines the management of educational outreach programs by se
 ```
 bright-futures/
 ├── src/
-│   ├── components/          # Reusable UI components
-│   │   ├── ui/              # shadcn/ui components
-│   │   ├── AppSidebar.tsx   # Navigation sidebar
-│   │   ├── Layout.tsx       # App layout with sidebar
-│   │   ├── NavLink.tsx      # Custom nav link component
+│   ├── components/            # Reusable UI components
+│   │   ├── ui/                # shadcn/ui components
+│   │   ├── AppSidebar.tsx     # Navigation sidebar
+│   │   ├── Layout.tsx         # App layout with sidebar
+│   │   ├── NavLink.tsx        # Custom nav link component
 │   │   └── ProtectedRoute.tsx # Auth protection
 │   ├── contexts/
-│   │   └── AuthContext.tsx  # Authentication context
+│   │   └── AuthContext.tsx    # Authentication context
 │   ├── lib/
-│   │   ├── supabase.ts      # Supabase client
-│   │   └── demoData.ts       # Built-in demo data
+│   │   ├── supabase.ts        # Supabase client
+│   │   └── demoData.ts        # Built-in demo data
 │   ├── pages/
-│   │   ├── Dashboard.tsx     # Main dashboard
-│   │   ├── Schools.tsx       # Schools CRUD
-│   │   ├── Volunteers.tsx    # Volunteers CRUD
-│   │   ├── Schedules.tsx     # Schedules CRUD
-│   │   ├── Partners.tsx      # Partners CRUD
-│   │   ├── Reports.tsx       # Reports & analytics
-│   │   └── Login.tsx         # Login page
-│   ├── App.tsx              # Main app component
-│   └── main.tsx             # Entry point
+│   │   ├── Dashboard.tsx      # Main dashboard
+│   │   ├── Schools.tsx        # Schools CRUD
+│   │   ├── Volunteers.tsx     # Volunteers CRUD
+│   │   ├── Schedules.tsx      # Schedules CRUD
+│   │   ├── Partners.tsx       # Partners CRUD
+│   │   ├── Reports.tsx        # Reports & analytics
+│   │   └── Login.tsx          # Login page
+│   ├── App.tsx                # Main app component
+│   └── main.tsx               # Entry point
 ├── supabase/
-│   └── schema.sql           # Database schema
+│   └── schema.sql             # Database schema
 ├── package.json
 ├── tailwind.config.ts
 ├── tsconfig.json
